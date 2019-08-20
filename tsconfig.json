@@ -1,0 +1,24 @@
+{
+  "extends": "@ts-mono/base/tsconfig",
+  "exclude": [
+    "node_modules",
+    "out/**/*",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ],
+  "compilerOptions": {
+    "incremental": true,
+    "outDir": "out",
+    "allowJs": true,
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "jsx": "preserve"
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}

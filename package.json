@@ -1,0 +1,43 @@
+{
+  "name": "react-dev-memo",
+  "version": "0.0.1",
+  "main": "cjs",
+  "module": "esm",
+  "typings": "cjs/index.d.ts",
+  "repository": "git@github.com:rwu823/react-dev-memo.git",
+  "author": "Rocky Wu <rwu823@gmail.com>",
+  "license": "MIT",
+  "description": "React memo highlight dev tool",
+  "keywords": [
+    "memo",
+    "debug",
+    "dev"
+  ],
+  "devDependencies": {
+    "@ts-mono/base": "rwu823/ts-mono#base/latest",
+    "@ts-mono/dev-react": "rwu823/ts-mono#dev-react",
+    "next": "^9.0.5",
+    "npm-run-all": "^4.1.5",
+    "styled-components": "^4.3.2"
+  },
+  "scripts": {
+    "build:cjs": "tsc -b tsconfig.cjs.json",
+    "build:esm": "tsc -b tsconfig.esm.json",
+    "build:page": "rm -rf .next gh-pages && next build && next export -o gh-pages",
+    "build": "rm -rf out && run-p build:* && cp README.md package.json out",
+    "dev": "next"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js}": [
+      "eslint --fix"
+    ]
+  },
+  "peerDependencies": {
+    "react": ">= 16.8.0"
+  }
+}

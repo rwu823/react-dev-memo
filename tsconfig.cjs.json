@@ -1,0 +1,15 @@
+{
+  "extends": "@ts-mono/base/tsconfig",
+  "files": [
+    "lib/index.tsx"
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.next/cache/.tsbuildinfo",
+    "module": "commonjs",
+    "target": "esnext",
+    "outDir": "out/cjs",
+    "jsx": "react"
+  }
+}
