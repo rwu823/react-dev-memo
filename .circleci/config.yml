@@ -54,6 +54,21 @@ commands:
             command: |
               git config --global user.name '<<parameters.user>>'
               git config --global user.email '<<parameters.email>>'
+    push-tag:
+      parameters:
+        tag:
+          type: string
+          default: $GIT_TAG
+        repo:
+          type: string
+          default: $TOKEN_REPO
+      steps:
+        - setup-git
+        - run:
+            name: Push git tag
+            command: |
+              git tag $GIT_TAG
+              git push --quiet << parameters.repo >> $GIT_TAG
 
     push-branch:
       parameters:
@@ -103,26 +118,55 @@ commands:
             name: Init Submodule
             command: git submodule update --init --remote --depth 1
         - run:
-            name: Decrypt Secret
-            command: |
-              sudo apt-get -y -qq update
-              sudo apt-get install bsdmainutils
-              yarn --silent transcrypt -p "$REPO_SECRET" -y
-        - run:
             name: Exports Env
             command: |
-              echo "$(yarn --silent ts-node scripts/export-env)" >> $BASH_ENV
+              echo "$(node env/export)" >> $BASH_ENV
               echo 'export PATH="$(yarn global bin):$PATH"' >> $BASH_ENV
 
               source $BASH_ENV
 
 jobs:
+  deploy_gh:
+    executor: node
+    steps:
+      - restore_cache:
+          key: build#{{ .Revision }}
+      - push-branch:
+          dir: gh-pages
+          branch: gh-pages
+          force: true
+
+  deploy_npm:
+    executor: node
+    steps:
+      - restore_cache:
+          key: build#{{ .Revision }}
+      - deploy-to-npm
+
+  git_tag:
+    executor: node
+    steps:
+      - checkout-install
+      - push-tag
+
+  build:
+    executor: node
+    steps:
+      - checkout-install
+      - run: yarn build
+      - save_cache:
+          key: build#{{ .Revision }}
+          paths:
+            - out
+            - gh-pages
+
   test:
     executor: node
     steps:
       - checkout-install
-      - run: npx jest --passWithNoTests
+      - run: npx jest --coverage
       - run: bash <(curl -s https://codecov.io/bash)
+
   lint:
     executor: node
     steps:
@@ -134,9 +178,31 @@ jobs:
 workflows:
   version: 2
 
-  Base:
+  Deploy:
+    jobs:
+      - build:
+          <<: *branch_master
+      - test:
+          <<: *branch_master
+      - git_tag:
+          <<: *branch_master
+          requires:
+            - test
+            - build
+      - deploy_gh:
+          <<: *branch_master
+          requires:
+            - test
+            - build
+      - deploy_npm:
+          <<: *branch_master
+          requires:
+            - test
+            - build
+  Test:
     jobs:
       - test:
           <<: *branch_testing
       - lint:
           <<: *branch_testing
+

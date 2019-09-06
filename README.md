@@ -17,7 +17,7 @@
 </p>
 
 <h4 align="center">
-  <sub>Material ripple effect, ripples everywhere</sub>
+  <sub>Don't let your pure component no pure.</sub>
 </h4>
 
 <h3 align="center">
