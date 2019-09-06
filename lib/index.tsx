@@ -1,4 +1,4 @@
-/* eslint-disable react/destructuring-assignment, react/prop-types */
+/* eslint-disable react/destructuring-assignment */
 
 import React from 'react'
 
