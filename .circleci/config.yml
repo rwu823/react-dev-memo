@@ -21,7 +21,7 @@ executors:
       - image: circleci/node:12
 
 commands:
-    setup-npm:
+    setup_npm:
       parameters:
         token:
           type: string
@@ -31,16 +31,16 @@ commands:
             name: Setup NPM
             command: echo "//registry.npmjs.org/:_authToken=<<parameters.token>>" >> ~/.npmrc
 
-    deploy-to-npm:
+    deploy_npm:
       parameters:
         dir:
           type: string
           default: out
       steps:
-        - setup-npm
+        - setup_npm
         - run: npm publish << parameters.dir >>
 
-    setup-git:
+    setup_git:
       parameters:
         user:
           type: string
@@ -54,7 +54,7 @@ commands:
             command: |
               git config --global user.name '<<parameters.user>>'
               git config --global user.email '<<parameters.email>>'
-    push-tag:
+    push_tag:
       parameters:
         tag:
           type: string
@@ -63,14 +63,14 @@ commands:
           type: string
           default: $TOKEN_REPO
       steps:
-        - setup-git
+        - setup_git
         - run:
-            name: Push git tag
+            name: Push git tag << parameters.tag >>
             command: |
               git tag $GIT_TAG
-              git push --quiet << parameters.repo >> $GIT_TAG
+              git push --quiet << parameters.repo >> << parameters.tag >>
 
-    push-branch:
+    push_branch:
       parameters:
         tag:
           type: string
@@ -88,7 +88,7 @@ commands:
           type: string
           default: $GIT_TAG
       steps:
-        - setup-git
+        - setup_git
         - run:
             name: Push to << parameters.branch >>
             command: |
@@ -102,7 +102,7 @@ commands:
 
               rm -rf .git
 
-    checkout-install:
+    checkout_install:
       description: Checkout sources and install node_modules
       steps:
         - checkout
@@ -126,33 +126,35 @@ commands:
               source $BASH_ENV
 
 jobs:
-  deploy_gh:
+  deploy-gh:
     executor: node
     steps:
+      - checkout_install
       - restore_cache:
           key: build#{{ .Revision }}
-      - push-branch:
+      - push_branch:
           dir: gh-pages
           branch: gh-pages
           force: true
 
-  deploy_npm:
+  deploy-npm:
     executor: node
     steps:
+      - checkout_install
       - restore_cache:
           key: build#{{ .Revision }}
-      - deploy-to-npm
+      - deploy_npm
 
-  git_tag:
+  push-git-tag:
     executor: node
     steps:
-      - checkout-install
-      - push-tag
+      - checkout_install
+      - push_tag
 
   build:
     executor: node
     steps:
-      - checkout-install
+      - checkout_install
       - run: yarn build
       - save_cache:
           key: build#{{ .Revision }}
@@ -163,14 +165,14 @@ jobs:
   test:
     executor: node
     steps:
-      - checkout-install
+      - checkout_install
       - run: npx jest --coverage
       - run: bash <(curl -s https://codecov.io/bash)
 
   lint:
     executor: node
     steps:
-      - checkout-install
+      - checkout_install
       - run:
           name: Run ESLint only on modified files.
           command: npx eslint $(git diff --diff-filter=d origin/HEAD --name-only --cached '*.ts' '*.tsx' '*.js')
@@ -184,17 +186,17 @@ workflows:
           <<: *branch_master
       - test:
           <<: *branch_master
-      - git_tag:
+      - push-git-tag:
           <<: *branch_master
           requires:
             - test
             - build
-      - deploy_gh:
+      - deploy-gh:
           <<: *branch_master
           requires:
             - test
             - build
-      - deploy_npm:
+      - deploy-npm:
           <<: *branch_master
           requires:
             - test
