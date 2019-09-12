@@ -1,6 +1,6 @@
 {
   "name": "react-dev-memo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "cjs",
   "module": "esm",
   "typings": "cjs/index.d.ts",
