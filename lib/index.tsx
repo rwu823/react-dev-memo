@@ -4,7 +4,6 @@ import React from 'react'
 
 const { NODE_ENV } = process.env
 const isDev = !NODE_ENV || NODE_ENV === 'development'
-const isTest = NODE_ENV === 'test'
 
 export interface DevMemoOptions {
   /** display highlight */
@@ -28,7 +27,7 @@ const devMemo = <P extends object>(
   const opts: DevMemoOptions = {
     outline: '1px solid #f2e',
     duration: 500,
-    highlight: isDev || isTest,
+    highlight: isDev,
     console: false,
     ...options,
   }

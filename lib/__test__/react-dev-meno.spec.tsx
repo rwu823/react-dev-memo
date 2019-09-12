@@ -41,6 +41,7 @@ describe('Test `devMemo` Spec', () => {
 
   it('re-render correctly', async () => {
     const PureDevMemo = devMemo(Pure, [], {
+      highlight: true,
       console: true,
     })
     const App: React.FC<{}> = () => {
